@@ -18,11 +18,8 @@ TELEGRAM_CHANNEL = os.environ.get("TELEGRAM_CHANNEL", "").strip()
 # En el Bloque 3 pondremos aquí tu enlace de afiliado / Gumroad.
 # Por ahora redirige a tu propio canal para viralizar cuando reenvíen tus mensajes.
 CANAL_LIMPIO = TELEGRAM_CHANNEL.replace("@", "")
-ENLACE_MONETIZACION = f"https://t.me/{CANAL_LIMPIO}"
-TEXTO_GANCHO = (
-    "📲 Recibe todas las ayudas y subastas del BOE al instante en nuestro canal"
-    " oficial"
-)
+ENLACE_MONETIZACION = "https://marcosboullos.gumroad.com/l/vfqcj"
+TEXTO_GANCHO = "📊 Accede aquí al Buscador Excel Auto-Actualizable con TODAS las ayudas y subastas activas"
 
 PALABRAS_CLAVE = [
     "subvenci",
