@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://GL-cpu101.github.io/motor-ayudas-espana/sitemap.xml
