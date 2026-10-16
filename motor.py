@@ -267,7 +267,37 @@ def main():
         f"[ÉXITO TOTAL] Se han procesado y guardado {len(registros_procesados)}"
         " registros."
     )
+  # Añade esta línea al final de main(), justo antes de terminar la función:
+  generar_sitemap_y_robots()
+def generar_sitemap_y_robots():
+  """Genera automáticamente sitemap.xml y robots.txt para indexar en Google."""
+  hoy_str = datetime.date.today().strftime("%Y-%m-%d")
+  usuario = os.environ.get("GITHUB_REPOSITORY_OWNER", "usuario")
+  url_base = f"https://{usuario}.github.io/motor-ayudas-espana/"
 
+  # 1. Crear sitemap.xml
+  contenido_sitemap = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>{url_base}</loc>
+    <lastmod>{hoy_str}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>"""
 
+  with open("sitemap.xml", "w", encoding="utf-8") as f:
+    f.write(contenido_sitemap.strip())
+
+  # 2. Crear robots.txt
+  contenido_robots = f"""User-agent: *
+Allow: /
+
+Sitemap: {url_base}sitemap.xml"""
+
+  with open("robots.txt", "w", encoding="utf-8") as f:
+    f.write(contenido_robots.strip())
+
+  print("[OK] sitemap.xml y robots.txt generados correctamente para Google.")
 if __name__ == "__main__":
   main()
