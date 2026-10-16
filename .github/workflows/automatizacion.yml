@@ -35,6 +35,6 @@ jobs:
         run: |
           git config --global user.name "Robot Autonomo BOE"
           git config --global user.email "actions@github.com"
-          git add datos/
+          git add datos/ sitemap.xml robots.txt
           git diff --staged --quiet || git commit -m "Actualizacion automatica de dataset y alertas"
           git push
