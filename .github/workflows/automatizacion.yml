@@ -1,0 +1,40 @@
+name: Motor Autonomo BOE y Datasets
+
+on:
+  schedule:
+    # Se ejecuta automáticamente a las 06:30 UTC (07:30 / 08:30 AM hora de España) y a las 14:30 UTC
+    - cron: '30 6,14 * * *'
+  workflow_dispatch: # Crea un botón para que puedas probarlo manualmente cuando quieras
+
+permissions:
+  contents: write # Permite que el robot guarde solo el Excel/CSV actualizado en tu cuenta
+
+jobs:
+  ejecutar_motor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar tu repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar Python gratis en el servidor de Microsoft
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar libreria de conexion
+        run: pip install requests
+
+      - name: Ejecutar el Cerebro de IA y publicar en Telegram
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
+        run: python motor.py
+
+      - name: Guardar el Dataset actualizado automaticamente
+        run: |
+          git config --global user.name "Robot Autonomo BOE"
+          git config --global user.email "actions@github.com"
+          git add datos/
+          git diff --staged --quiet || git commit -m "Actualizacion automatica de dataset y alertas"
+          git push
