@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radar BOE: Subvenciones, Ayudas y Subastas Públicas en España</title>
+  <meta name="description" content="Buscador actualizado en tiempo real de convocatorias oficiales, subvenciones para autónomos y pymes, y subastas del Estado procedentes del BOE.">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --primary: #0f172a;
+      --accent: #2563eb;
+      --text: #334155;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); line-height: 1.6; }
+    header { background-color: var(--primary); color: #ffffff; padding: 2.5rem 1rem; text-align: center; }
+    header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+    header p { color: #94a3b8; font-size: 1rem; max-width: 650px; margin: 0 auto; }
+    .container { max-width: 900px; margin: -1.5rem auto 3rem auto; padding: 0 1rem; }
+    .banner-gumroad { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #334155; color: #ffffff; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 1rem; }
+    @media(min-width: 640px) { .banner-gumroad { flex-direction: row; align-items: center; justify-content: space-between; } }
+    .banner-cta { background-color: #38bdf8; color: #0f172a; font-weight: 700; text-decoration: none; padding: 0.75rem 1.25rem; border-radius: 8px; text-align: center; white-space: nowrap; transition: background 0.2s; }
+    .banner-cta:hover { background-color: #7dd3fc; }
+    .search-box { margin-bottom: 1.5rem; }
+    .search-input { width: 100%; padding: 0.85rem 1.25rem; font-size: 1rem; border: 1px solid var(--border); border-radius: 8px; background-color: #ffffff; outline: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .search-input:focus { border-color: var(--accent); ring: 2px var(--accent); }
+    .counter { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem; }
+    .grid { display: flex; flex-direction: column; gap: 1rem; }
+    .card { background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+    .card-meta { display: flex; gap: 0.5rem; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; }
+    .badge { background-color: #e0f2fe; color: #0369a1; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; }
+    .card-title { font-size: 1.1rem; color: var(--primary); margin-bottom: 0.75rem; line-height: 1.4; }
+    .card-summary { font-size: 0.925rem; color: var(--text); margin-bottom: 1rem; white-space: pre-line; }
+    .card-links { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; border-top: 1px solid var(--border); padding-top: 0.75rem; }
+    .btn-boe { color: var(--accent); text-decoration: none; font-size: 0.85rem; font-weight: 600; }
+    .btn-boe:hover { text-decoration: underline; }
+    footer { text-align: center; padding: 2rem 1rem; font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Radar Oficial de Subvenciones y Subastas</h1>
+    <p>Monitor independiente de convocatorias públicas, ayudas directas y licitaciones del BOE procesadas automáticamente mediante IA.</p>
+  </header>
+
+  <div class="container">
+    <!-- BANNER CONECTADO A TU PRODUCTO DE GUMROAD -->
+    <div class="banner-gumroad">
+      <div>
+        <h3 style="font-size: 1.1rem; margin-bottom: 0.25rem;">📊 Base de Datos Consolidada en Excel</h3>
+        <p style="font-size: 0.875rem; color: #cbd5e1;">Accede al histórico completo auto-actualizable cada mañana con filtros avanzados por provincia y cuantía.</p>
+      </div>
+      <!-- NOTA: Pega aquí la misma URL de Gumroad que pusiste en motor.py -->
+      <a href="https://marcosboullos.gumroad.com/l/vfqcj" id="link-gumroad" class="banner-cta" target="_blank" rel="noopener">Descargar Base en Vivo</a>
+    </div>
+
+    <div class="search-box">
+      <input type="text" id="searchInput" class="search-input" placeholder="Filtrar por palabra clave (ej. vivienda, autónomos, placas, subasta, Madrid)...">
+    </div>
+
+    <div class="counter" id="itemCount">Cargando convocatorias oficiales...</div>
+
+    <div class="grid" id="itemsList"></div>
+  </div>
+
+  <footer>
+    <p>Aviso legal: Este portal ofrece información pública procedente del Boletín Oficial del Estado bajo la Ley 37/2007 sobre reutilización de datos del sector público. No constituye la sede oficial ni representa a ningún organismo gubernamental.</p>
+  </footer>
+
+  <script>
+    let dataset = [];
+    const itemsList = document.getElementById('itemsList');
+    const searchInput = document.getElementById('searchInput');
+    const itemCount = document.getElementById('itemCount');
+
+    // Carga automática del JSON generado por tu robot de GitHub Actions
+    fetch('datos/dataset_ayudas_boe.json')
+      .then(response => {
+        if (!response.ok) throw new Error('No se pudo cargar el dataset local');
+        return response.json();
+      })
+      .then(data => {
+        dataset = data;
+        renderItems(dataset);
+      })
+      .catch(err => {
+        itemCount.textContent = 'Las primeras convocatorias se están compilando. Estarán visibles tras la siguiente actualización programada.';
+        console.error(err);
+      });
+
+    function renderItems(items) {
+      itemsList.innerHTML = '';
+      itemCount.textContent = `Mostrando ${items.length} convocatorias y subastas activas`;
+
+      if (items.length === 0) {
+        itemsList.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">No se encontraron resultados para este filtro.</p>';
+        return;
+      }
+
+      items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="card-meta">
+            <span class="badge">${escapeHtml(item.fecha || 'Reciente')}</span>
+            <span>ID: ${escapeHtml(item.id || '')}</span>
+          </div>
+          <h2 class="card-title">${escapeHtml(item.titulo_original || '')}</h2>
+          <div class="card-summary">${escapeHtml(item.resumen_ia || item.titulo_original || '')}</div>
+          <div class="card-links">
+            <a href="${escapeHtml(item.url_oficial || '#')}" class="btn-boe" target="_blank" rel="noopener">Ver anuncio oficial en el BOE &rarr;</a>
+          </div>
+        `;
+        itemsList.appendChild(card);
+      });
+    }
+
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      const filtered = dataset.filter(item => {
+        const text = ((item.titulo_original || '') + ' ' + (item.resumen_ia || '')).toLowerCase();
+        return text.includes(query);
+      });
+      renderItems(filtered);
+    });
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>
